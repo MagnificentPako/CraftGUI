@@ -1,0 +1,14 @@
+object.attributes.text = attribute("")
+object.attributes.bg = attribute(colors.white)
+object.attributes.fg = attribute(colors.black)
+object.attributes.x = attribute(1)
+object.attributes.y = attribute(1)
+
+object.object_type = "label"
+
+function object:draw()
+	term.setCursorPos(self:getAttribute("x"),self:getAttribute("y"))
+	term.setBackgroundColor(self:getAttribute("bg"))
+	term.setTextColor(self:getAttribute("fg"))
+	term.write(self:getAttribute("text"))
+end

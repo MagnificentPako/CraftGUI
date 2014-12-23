@@ -1,0 +1,105 @@
+local objectloader = dofile(".craftgui/objectloader")
+
+local initPattern = "objects.{name} = {obj}.new()"
+local attributePattern = "objects.{name}:setAttribute('{attribute}',{value})"
+local function serializeObject(obj,name)
+	local serialized = ""
+	local function newLine(l)
+		serialized = serialized..l.."\n"
+	end
+	local function formatArg(k)
+		if(type(k)=="string") then
+			if(string.sub(k,1,9)=="@function") then
+				return "loadstring([["..string.sub(k,10,#k).."]])"
+			end
+			return "'"..k.."'"
+		elseif(type(k)=="table") then
+			return  [[textutils.unserialize("]]..textutils.serialize(k)..[[")]]
+		elseif(type(k)=="function") then
+			return "loadstring([["..tostring(k).."]])"
+		else
+			return k
+		end
+	end
+	local init = ""
+	init = string.gsub(initPattern,"{name}",name)
+	init = string.gsub(init,"{obj}",obj:getType())
+	newLine(init)
+	local attributes = obj:getAttributes()
+	for k,v in pairs(attributes) do
+		if(obj:getAttribute(k)~=obj:getDefaultAttribute(k)) then
+			local l = ""
+			l = string.gsub(attributePattern,"{name}",name)
+			l = string.gsub(l,"{attribute}",k)
+			l =string.gsub(l,"{value}",formatArg(obj:getAttribute(k)))
+			newLine(l)
+		end
+	end
+	return serialized
+end
+
+local function writeTemplate(path,obj)
+	local handle = fs.open(".craftgui/program.template","r")
+	local template = handle.readAll()
+	handle.close()
+	local init = ""
+	for k,v in pairs(obj) do
+		init = init..serializeObject(v,k).."\n"
+	end
+	template = string.gsub(template,"{INITIALIZE_OBJECTS}",init)
+	
+	local added = {}
+	local add = ""
+	for k,v in pairs(obj) do
+		if(not added[v:getType()]) then
+			add = add.."local "..v:getType().." = objectloader.load('"..v:getType().."') \n"
+			added[v:getType()] = true
+		end
+	end
+
+	add = "local objectloader = dofile('.craftgui/objectloader')\n"..add
+
+	template = string.gsub(template,"{ADD_OBJECTS}",add)
+
+	local handle = fs.open(path,"w")
+	handle.write(template)
+	handle.flush()
+	handle.close()
+end
+
+
+--The actual program right now
+--maybe adding a GUI later
+local args = {...}
+local input = nil
+local target = nil
+local objects = {}
+
+if(#args==2) then
+	if(fs.exists(args[1])) then
+		input = args[1]
+		target = args[2]
+	end 
+end
+
+if(input and target) then
+	local handle = fs.open(input,"r")
+	local content = handle.readAll()
+	handle.close()
+	local env = {}
+	env.objects = {}
+	env.objectloader = objectloader
+	for k,v in pairs(fs.list(".craftgui/objects")) do
+		env[string.sub(v,1,#v-5)] = objectloader.loadRaw(fs.combine(".craftgui/objects",v))
+	end
+	env = setmetatable(env,{__index=_G})
+	local func = loadstring(content)
+	setfenv(func,env)
+	func()
+	objects = env.objects
+else
+	print("usage: "..shell.getRunningProgram().." <input> <output>")
+	error()
+end
+
+writeTemplate(target,objects or {})

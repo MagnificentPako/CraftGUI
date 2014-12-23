@@ -1,0 +1,7 @@
+object.attributes.color = attribute(colors.black)
+object.object_type = "background"
+
+function object:draw()
+	term.setBackgroundColor(self:getAttribute("color"))
+	term.clear()
+end

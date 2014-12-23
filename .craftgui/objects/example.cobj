@@ -1,0 +1,42 @@
+--[[
+
++-------------------------------------------+
+|                                           |
+|              COBJ Tutorial                |
+|                                           |
+|              By Freack100                 |
+|                                           |
++-------------------------------------------+
+
+In this little tutorial I will explain how a COBJ file works. It actualy is just a lua script.
+
+Let's look at the label.cobj file: >>
+	object.attributes.text = attribute("")
+	object.attributes.bg = attribute(colors.white)
+	object.attributes.fg = attribute(colors.black)
+	object.attributes.x = attribute(1)
+	object.attributes.y = attribute(1)
+
+	object.object_type = "label"
+
+	function object:draw()
+		term.setCursorPos(self:getAttribute("x"),self:getAttribute("y"))
+		term.setBackgroundColor(self:getAttribute("bg"))
+		term.setTextColor(self:getAttribute("fg"))
+		term.write(self:getAttribute("text"))
+	end
+<<
+
+
+It might look a bit strange to you, but in here, it just sets the object specific attributes and defines the draw function.
+
+So, the "attribute" function is just a little function I added so you don't have to write stuff like this: "object.attributes.x = {['value']=1,['default']=1}"
+
+object.object_type is the object type (as the name says) and is just for the "compiled" program and the later made graphical CraftGUI.
+
+And object:draw() is the function to draw the label. There is no big problem, just that you either have to write a ':' or add a 'self' as the first parameter for the function. You can access the object through the 'self' table then.
+
+The object got some inbuilt functions too, like getAttribute() and setAttribute().
+They aren't really interesting for you, unless you want to make the GUI more advanced.
+
+--]]

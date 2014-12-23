@@ -1,0 +1,19 @@
+objects.label1 = label.new()
+objects.label1:setAttribute("text","text")
+
+objects.background = background.new()
+objects.background:setAttribute("color",colors.gray)
+
+objects.sq1 = square.new()
+objects.sq1:setAttribute("color",colors.green)
+objects.sq1:setAttribute("x",5)
+objects.sq1:setAttribute("y",6)
+objects.sq1:setAttribute("x2",10)
+objects.sq1:setAttribute("y2",10)
+
+objects.sq2 = square.new()
+objects.sq2:setAttribute("color",colors.red)
+objects.sq2:setAttribute("x",12)
+objects.sq2:setAttribute("y",12)
+objects.sq2:setAttribute("x2",15)
+objects.sq2:setAttribute("y2",16)

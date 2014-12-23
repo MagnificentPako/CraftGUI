@@ -1,0 +1,61 @@
+local objectloader = {}
+
+local function copy(t) local tt = {} for k,v in pairs(t) do tt[k] = v end return t end
+
+function objectloader.loadRaw(obj)
+	local func,err = loadfile(obj)
+	if(func) then
+		local env = {}
+		env.object = {}
+		env.object.attributes = {}
+		env = setmetatable(env,{__index=_G})
+		
+				env.attribute = function(d)
+			return {value=d,default=d}
+		end
+
+		setfenv(func,env)
+		func()
+
+		env.object.getAttribute = function(self,k)
+			if(self.attributes[k]) then
+				return self.attributes[k]["value"]
+			end
+		end
+
+		env.object.setAttribute = function(self,k,v)
+			if(not self.attributes[k]) then self.attributes[k] = {value=v,default=nil} end
+			self.attributes[k]["value"] = v
+		end
+
+		env.object.resetAttribute = function(self,k)
+			self.attributes[k]["value"] = self.attributes[k]["default"]
+		end
+
+		env.object.getDefaultAttribute = function(self,k)
+			return self.attributes[k]["default"]
+		end
+		
+		env.object.getAttributes = function(self)
+			return self.attributes
+		end
+
+		env.object.getType = function(self)
+			return env.object.object_type or "unknown"
+		end
+
+		env.new = function()
+			return copy(env.object)
+		end
+
+		return env
+	else
+		error(err)
+	end
+end
+
+function objectloader.load(obj)
+	return objectloader.loadRaw(".craftgui/objects/"..obj..".cobj")
+end
+
+return objectloader

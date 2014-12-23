@@ -1,0 +1,3 @@
+object.attributes.priority = attribute({"background","@other"})
+
+object.object_type = "priority"

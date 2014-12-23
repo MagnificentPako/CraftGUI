@@ -1,0 +1,19 @@
+object.attributes.color = attribute(colors.white)
+object.attributes.x = attribute(1)
+object.attributes.y = attribute(1)
+object.attributes.x2 = attribute(1)
+object.attributes.y2 = attribute(1)
+
+object.object_type = "square"
+
+function object:draw()
+	term.setBackgroundColor(self:getAttribute("color"))
+	for i = self:getAttribute("y"),self:getAttribute("y2") do
+		term.setCursorPos(self:getAttribute("x"),i)
+		if(self:getAttribute("x2")>self:getAttribute("x")) then
+			term.write(string.rep(" ",self:getAttribute("x2")-self:getAttribute("x")))
+		else
+			term.write(string.rep(" ",self:getAttribute("x")-self:getAttribute("x2")))
+		end
+	end
+end

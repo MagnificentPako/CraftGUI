@@ -1,0 +1,67 @@
+if(not fs.exists(".craftgui")) then error("CraftGUI is needed to run this program.",0) end
+
+objects = {}
+_G.objects = objects
+running = true
+_G.shouldRedraw = true
+
+{ADD_OBJECTS}
+local priority = objectloader.load("priority")
+
+local function init()
+objects.priority = priority.new()
+
+{INITIALIZE_OBJECTS}
+end
+
+local function redraw()
+	local drawn = {}
+	term.clear()
+	term.setCursorPos(1,1)
+	for _,current_priority in pairs(objects.priority:getAttribute("priority")) do
+		for k,v in pairs(objects) do
+			if(v:getType()==current_priority or current_priority == "@other") then
+				if(not drawn[k]) then
+					if(v.draw) then
+						v:draw()
+					end
+					drawn[k] = true
+				end
+			end
+		end
+	end
+	drawn = nil
+	shouldRedraw = false
+end
+
+local function handleEvent(...)
+	local evt = {...}
+	--add your own handling here if you want
+	-- this is just a simple handling of the requested events per object
+	for k,v in pairs(objects) do
+		if(v:getAttribute("receiveEvents")) then
+			if(v:getAttribute("receiveEvents")[evt[1]]) then
+				v:getAttribute("func")(unpack(evt))
+			end
+		end
+	end
+	--Handle the events here
+end
+
+local function main()
+	os.queueEvent("firstYield")
+	while running do
+		local evt = {os.pullEvent()}
+		handleEvent(unpack(evt))
+		if(_G.shouldRedraw) then redraw() end
+	end
+end
+
+init()
+main()
+
+--cleanup
+shouldRedraw = nil
+running = nil
+objects = nil
+_G.objects = nil
